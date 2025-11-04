@@ -18,6 +18,20 @@ const STORAGE_KEYS = {
 } as const;
 
 /**
+ * Obtém a URL base da aplicação (considerando GitHub Pages)
+ */
+function getBaseUrl(): string {
+  return window.location.origin + import.meta.env.BASE_URL;
+}
+
+/**
+ * Obtém a URL de callback
+ */
+function getCallbackUrl(): string {
+  return getBaseUrl() + 'callback';
+}
+
+/**
  * Gera string aleatória criptograficamente segura
  */
 function generateRandomString(length: number): string {
@@ -74,10 +88,10 @@ export async function initiateOAuthFlow(scope: string): Promise<void> {
   sessionStorage.setItem(STORAGE_KEYS.CODE_VERIFIER, codeVerifier);
   sessionStorage.setItem(STORAGE_KEYS.STATE, state);
 
-  // Construir URL de autorização
+  // Construir URL de autorização com callback correto
   const params = new URLSearchParams({
     client_id: GITHUB_CLIENT_ID,
-    redirect_uri: window.location.origin + '/callback',
+    redirect_uri: getCallbackUrl(),
     scope: scope,
     state: state,
     code_challenge: codeChallenge,
@@ -127,7 +141,7 @@ export async function handleOAuthCallback(): Promise<{
       client_id: GITHUB_CLIENT_ID,
       code: code,
       code_verifier: codeVerifier,
-      redirect_uri: window.location.origin + '/callback',
+      redirect_uri: getCallbackUrl(),
     }),
   });
 
@@ -197,6 +211,6 @@ export function logout(): void {
   sessionStorage.removeItem(STORAGE_KEYS.CODE_VERIFIER);
   sessionStorage.removeItem(STORAGE_KEYS.STATE);
 
-  // Redirecionar para página inicial
-  window.location.href = '/';
+  // Redirecionar para página inicial (considerando base path)
+  window.location.href = import.meta.env.BASE_URL;
 }

@@ -40,9 +40,12 @@ jobs:
 
       - name: Build
         env:
-          # Injetar CLIENT_ID como variável de ambiente
+          NODE_ENV: production
           VITE_GITHUB_CLIENT_ID: ${{ secrets.VITE_GITHUB_CLIENT_ID }}
         run: pnpm run build
+
+      - name: Create 404.html for SPA routing
+        run: cp dist/public/index.html dist/public/404.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -50,8 +53,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './client/dist/public'
-
+          path: './dist/public'
 
   deploy:
     environment:
