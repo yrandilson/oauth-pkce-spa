@@ -1,11 +1,10 @@
-﻿import { createRouter, createWebHistory } from 'vue-router';
+﻿import { createRouter, createWebHashHistory } from 'vue-router'; // MUDANÇA: Hash History
 import { storeAccessToken, clearTokenStore } from '../utils/pkce';
 
 import LoginButton from '../components/LoginButton.vue';
 import Dashboard from '../components/Dashboard.vue'; 
 
 const TOKEN_ENDPOINT = 'https://github.com/login/oauth/access_token'; 
-// URL FINAL (Não altere para testes locais, o redirecionamento sempre volta para a url pública)
 const REDIRECT_URI = 'https://yrandilson.github.io/oauth-pkce-spa/'; 
 const CLIENT_ID = import.meta.env.VITE_APP_CLIENT_ID;
 
@@ -14,33 +13,34 @@ const determineProfile = () => {
 };
 
 const routes = [
-  { path: '/', component: LoginButton, name: 'Login' },
-  { path: '/dashboard', component: Dashboard, name: 'Dashboard' },
   { 
-    path: '/:pathMatch(.*)*', 
-    name: 'Callback',
+    path: '/', 
+    component: LoginButton, 
+    name: 'Login',
     beforeEnter: async (to, from, next) => {
+        // Verifica se há parâmetros de callback na URL
         const code = to.query.code;
         const returnedState = to.query.state;
 
-        // 1. Validação de State
+        // Se não há código, exibe a tela de login
+        if (!code) {
+            return next();
+        }
+
+        // CALLBACK: Processa o retorno do OAuth
         const savedState = sessionStorage.getItem('state');
         if (returnedState !== savedState) {
             console.error('Erro de Segurança: State inválido.');
             clearTokenStore();
+            alert('Erro de segurança detectado. Tente novamente.');
             return next('/');
         }
         sessionStorage.removeItem('state');
 
-        if (!code) {
-            clearTokenStore(); 
-            return next('/');
-        }
-
-        // 2. Troca de Token (PKCE)
         const codeVerifier = sessionStorage.getItem('code_verifier');
         if (!codeVerifier) {
             console.error('Code Verifier ausente.');
+            alert('Erro na autenticação. Tente novamente.');
             return next('/');
         }
         sessionStorage.removeItem('code_verifier');
@@ -62,26 +62,47 @@ const routes = [
             });
 
             const data = await response.json();
-            if (data.error) throw new Error(data.error_description || data.error);
+            
+            if (data.error) {
+                throw new Error(data.error_description || data.error);
+            }
+            
+            if (!data.access_token) {
+                throw new Error('Access token não recebido');
+            }
             
             storeAccessToken(data.access_token); 
-            to.meta.profile = determineProfile(); 
+            console.log('✅ Autenticação bem-sucedida!');
             
             return next('/dashboard');
 
         } catch (error) {
-            console.error('Erro:', error);
-            alert('Falha na autenticação.');
+            console.error('❌ Erro na troca do token:', error);
+            alert(`Falha na autenticação: ${error.message}`);
             clearTokenStore();
             return next('/');
         }
+    }
+  },
+  { 
+    path: '/dashboard', 
+    component: Dashboard, 
+    name: 'Dashboard',
+    meta: { profile: 'Manager' },
+    beforeEnter: (to, from, next) => {
+        // Verifica se há token antes de acessar o dashboard
+        const { getAccessToken } = require('../utils/pkce');
+        if (!getAccessToken()) {
+            alert('Você precisa fazer login primeiro!');
+            return next('/');
+        }
+        next();
     }
   }
 ];
 
 const router = createRouter({
-  // MÁGICA: Lê automaticamente a 'base' definida no vite.config.js
-  history: createWebHistory(import.meta.env.BASE_URL), 
+  history: createWebHashHistory(import.meta.env.BASE_URL), // HASH MODE para GitHub Pages
   routes,
 });
 
