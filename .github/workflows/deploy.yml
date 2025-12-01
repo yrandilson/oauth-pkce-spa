@@ -1,0 +1,43 @@
+﻿# .github/workflows/deploy.yml
+name: ðŸ› ï¸ Build e Deploy da SPA (Vue/Vite)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 1. Checkout do cÃ³digo
+      uses: actions/checkout@v4
+
+    - name: 2. Configurar Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: 3. Instalar dependÃªncias
+      run: npm install
+
+    # Requisito D: InjeÃ§Ã£o de CLIENT_ID e nome do repositÃ³rio
+    - name: 4. Build da aplicaÃ§Ã£o com CLIENT_ID
+      run: |
+        # Injeta a Secret como variÃ¡vel de ambiente do Vite (VITE_APP_CLIENT_ID)
+        # Injeta o nome do repositÃ³rio para configurar o BASE_URL no Vite/Router
+        echo "VITE_APP_CLIENT_ID=.\setup_oauth_vue.ps1{{ secrets.AUTH_CLIENT_ID }}" >> .env
+        echo "VITE_REPO_NAME=/.\setup_oauth_vue.ps1{{ github.event.repository.name }}/" >> .env
+        npm run build 
+      env:
+        AUTH_CLIENT_ID: .\setup_oauth_vue.ps1{{ secrets.AUTH_CLIENT_ID }} 
+
+    # Requisito D: Deploy para GitHub Pages
+    - name: 5. Deploy para GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: .\setup_oauth_vue.ps1{{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist # O diretÃ³rio padrÃ£o de build do Vite
