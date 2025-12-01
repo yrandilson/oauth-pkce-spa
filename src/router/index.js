@@ -123,14 +123,3 @@ router.beforeEach(async (to, from, next) => {
   }
 });
 
-export default router;
-```
-
-### 🚀 Últimos Passos
-
-1.  **Atualize o arquivo** no seu computador com o código acima.
-2.  **Faça o Push:**
-    ```powershell
-    git add .
-    git commit -m "fix: adiciona client_secret ao payload"
-    git push
