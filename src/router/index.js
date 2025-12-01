@@ -4,13 +4,14 @@ import { storeAccessToken, clearTokenStore, getAccessToken } from '../utils/pkce
 import LoginButton from '../components/LoginButton.vue';
 import Dashboard from '../components/Dashboard.vue';
 
-// Endpoint com Proxy para contornar CORS
+// 🔥 SOLUÇÃO CORS: Usando proxy público
+// ⚠️ IMPORTANTE: Ative o proxy em https://cors-anywhere.herokuapp.com/corsdemo
 const TOKEN_ENDPOINT = 'https://cors-anywhere.herokuapp.com/https://github.com/login/oauth/access_token';
 
-// URL do teu GitHub Pages (tem de ser exata)
+// URL do GitHub Pages (deve ser exata e com barra no final)
 const REDIRECT_URI = 'https://yrandilson.github.io/oauth-pkce-spa/';
 
-// As chaves secretas vêm do .env ou do GitHub Secrets
+// Credenciais (lidas do .env ou Secrets)
 const CLIENT_ID = import.meta.env.VITE_APP_CLIENT_ID;
 const CLIENT_SECRET = import.meta.env.VITE_APP_CLIENT_SECRET;
 
@@ -32,7 +33,7 @@ const routes = [
     beforeEnter: (to, from, next) => {
       const token = getAccessToken();
       if (!token) {
-        alert('⚠️ Precisas de fazer login primeiro!');
+        alert('⚠️ Login necessário!');
         return next('/');
       }
       next();
@@ -41,23 +42,28 @@ const routes = [
 ];
 
 const router = createRouter({
-  // Hash Mode (#) para funcionar no GitHub Pages
+  // Hash Mode é obrigatório para GitHub Pages
   history: createWebHashHistory(import.meta.env.BASE_URL),
   routes,
 });
 
+// Guardião Global: Lógica de Login/Callback
 router.beforeEach(async (to, from, next) => {
   const code = to.query.code;
   const returnedState = to.query.state;
 
+  // Se não tem código na URL, segue normal
   if (!code) {
     return next();
   }
 
+  console.log('🔐 Processando callback OAuth...');
+  
   // Limpa a URL visualmente
   const cleanUrl = window.location.pathname + window.location.hash.split('?')[0];
   window.history.replaceState({}, document.title, cleanUrl);
 
+  // Validação de segurança
   const savedState = sessionStorage.getItem('state');
   if (returnedState !== savedState) {
     alert('❌ Erro de segurança: State inválido.');
@@ -75,6 +81,7 @@ router.beforeEach(async (to, from, next) => {
   sessionStorage.removeItem('code_verifier');
 
   try {
+    // Troca o código pelo token (com a senha/secret)
     const response = await fetch(TOKEN_ENDPOINT, {
       method: 'POST',
       headers: {
@@ -84,7 +91,7 @@ router.beforeEach(async (to, from, next) => {
       },
       body: JSON.stringify({
         client_id: CLIENT_ID,
-        client_secret: CLIENT_SECRET, // Obrigatório
+        client_secret: CLIENT_SECRET, // <--- OBRIGATÓRIO
         code: code,
         code_verifier: codeVerifier,
         redirect_uri: REDIRECT_URI,
@@ -110,4 +117,5 @@ router.beforeEach(async (to, from, next) => {
   }
 });
 
+// 👇 AQUI ESTAVA O ERRO! ESTA LINHA É OBRIGATÓRIA 👇
 export default router;
