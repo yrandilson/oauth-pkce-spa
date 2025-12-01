@@ -5,7 +5,7 @@ import LoginButton from '../components/LoginButton.vue';
 import Dashboard from '../components/Dashboard.vue'; 
 
 const TOKEN_ENDPOINT = 'https://github.com/login/oauth/access_token'; 
-const REDIRECT_URI = 'https://yrandilson.github.io/oauth-pkce-spa/'; 
+const REDIRECT_URI = 'https://yrandilson.github.io/oauth-pkce-spa/callback.html'; 
 const CLIENT_ID = import.meta.env.VITE_APP_CLIENT_ID;
 
 const determineProfile = () => {

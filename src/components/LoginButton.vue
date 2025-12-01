@@ -21,7 +21,7 @@ import { ref } from 'vue';
 import { generatePkceAndState } from '../utils/pkce';
 
 const CLIENT_ID = import.meta.env.VITE_APP_CLIENT_ID; 
-const REDIRECT_URI = 'https://yrandilson.github.io/oauth-pkce-spa/';
+const REDIRECT_URI = 'https://yrandilson.github.io/oauth-pkce-spa/callback.html';
 const SCOPES = 'read:user repo'; 
 const AUTH_URL = 'https://github.com/login/oauth/authorize';
 
