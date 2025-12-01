@@ -1,7 +1,26 @@
 ﻿<template>
   <div>
-    <h2>Bem-vindo!</h2>
-    <button @click="handleLogin" :disabled="isLoading" style="padding: 15px 30px; font-size: 16px; cursor: pointer;">
+    <h2>Bem-vindo! 👋</h2>
+    
+    <!-- Aviso importante sobre o proxy -->
+    <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+      <h3 style="margin-top: 0; color: #856404;">⚠️ Atenção - Primeira vez?</h3>
+      <p style="margin: 10px 0;">Para o login funcionar, você precisa ativar o proxy CORS:</p>
+      <ol style="margin: 10px 0; padding-left: 20px;">
+        <li>Abra: <a href="https://cors-anywhere.herokuapp.com/corsdemo" target="_blank" style="color: #0066cc;">cors-anywhere.herokuapp.com/corsdemo</a></li>
+        <li>Clique em <strong>"Request temporary access to the demo server"</strong></li>
+        <li>Volte aqui e clique em Login</li>
+      </ol>
+      <p style="margin: 10px 0 0 0; font-size: 14px; color: #856404;">
+        💡 Isso precisa ser feito apenas uma vez (dura algumas horas)
+      </p>
+    </div>
+
+    <button 
+      @click="handleLogin" 
+      :disabled="isLoading" 
+      style="padding: 15px 30px; font-size: 16px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 5px;"
+    >
       {{ isLoading ? '⏳ Preparando...' : '🔐 Login com GitHub (Perfil Manager)' }}
     </button>
     
