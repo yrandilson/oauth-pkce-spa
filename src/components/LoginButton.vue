@@ -50,9 +50,17 @@ const isLoading = ref(false);
 const handleLogin = async () => {
     console.log('🚀 Iniciando processo de login...');
     
+    // DEBUG: Verifica CLIENT_ID
+    console.log('🔑 CLIENT_ID disponível:', CLIENT_ID ? 'SIM' : 'NÃO');
+    console.log('🔑 CLIENT_ID valor:', CLIENT_ID?.substring(0, 15) + '...');
+    console.log('🔑 CLIENT_ID length:', CLIENT_ID?.length);
+    
     if (!CLIENT_ID) {
         console.error('❌ CLIENT_ID não configurado!');
-        alert("❌ Erro: CLIENT_ID não encontrado.\n\nVerifique se o Secret AUTH_CLIENT_ID está configurado no GitHub.");
+        alert("❌ Erro: CLIENT_ID não encontrado.\n\n" +
+              "Verifique se o Secret AUTH_CLIENT_ID está configurado no GitHub:\n" +
+              "Settings → Secrets and variables → Actions\n\n" +
+              "Depois, faça um novo deploy (push).");
         return;
     }
 
