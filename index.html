@@ -5,7 +5,29 @@
     <link rel="icon" href="/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OAuth PKCE SPA</title>
-    <script type="module" crossorigin src="/oauth-pkce-spa/assets/index-DSu_BnzS.js"></script>
+    <script>
+      // SCRIPT CRÍTICO: Redireciona query params para hash route ANTES do Vue carregar
+      (function() {
+        // Verifica se há query params na URL (retorno do OAuth)
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const state = urlParams.get('state');
+        const error = urlParams.get('error');
+        
+        // Se há params OAuth, redireciona para hash route
+        if (code || error) {
+          console.log('🔄 OAuth callback detectado, redirecionando para hash route...');
+          
+          // Constrói a URL com hash
+          const hashUrl = window.location.pathname + '#/' + window.location.search;
+          console.log('➡️ Nova URL:', hashUrl);
+          
+          // Substitui a URL atual (sem adicionar ao histórico)
+          window.location.replace(hashUrl);
+        }
+      })();
+    </script>
+    <script type="module" crossorigin src="/oauth-pkce-spa/assets/index-DnQNKolD.js"></script>
   </head>
   <body>
     <div id="app"></div>
